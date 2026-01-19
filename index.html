@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Escena 24</title>
 
-  <!-- ESTILOS (CSS) -->
   <style>
     body {
       margin: 0;
@@ -51,70 +50,61 @@
 
 <body>
 
-  <!-- ENCABEZADO -->
   <header>
     <h1>🎬 Escena 24</h1>
     <p>Cine, series, anime y cultura cinematográfica</p>
   </header>
 
-  <!-- CONTENEDOR DE PELÍCULAS -->
   <main id="movies"></main>
 
-  <!-- JAVASCRIPT -->
-  <script type="module">
-    // API Key desde las variables de entorno de Vercel
-    const API_KEY = 382a4cfe7ac6344821ba9b1c4c9f2661
+  <script>
+    // 🔑 PEGA AQUÍ TU API KEY REAL DE TMDB
+    const API_KEY = 382a4cfe7ac6344821ba9b1c4c9f2661;
 
-    // URLs base
-    const BASE_URL = "https://api.themoviedb.org/3"
-    const IMG_URL = "https://image.tmdb.org/t/p/w500"
+    const BASE_URL = "https://api.themoviedb.org/3";
+    const IMG_URL = "https://image.tmdb.org/t/p/w500";
 
-    // Contenedor donde se mostrarán las películas
-    const moviesContainer = document.getElementById("movies")
+    const moviesContainer = document.getElementById("movies");
 
-    // Obtener películas populares
     async function getPopularMovies() {
       try {
         const response = await fetch(
           `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-MX&page=1`
-        )
-
-        const data = await response.json()
-        renderMovies(data.results)
-
+        );
+        const data = await response.json();
+        renderMovies(data.results);
       } catch (error) {
-        console.error("Error al obtener películas:", error)
+        console.error("Error al cargar películas:", error);
       }
     }
 
-    // Dibujar tarjetas de películas
     function renderMovies(movies) {
-      moviesContainer.innerHTML = ""
+      moviesContainer.innerHTML = "";
 
       movies.forEach(movie => {
-        const movieCard = document.createElement("div")
-        movieCard.className = "movie-card"
+        const card = document.createElement("div");
+        card.className = "movie-card";
 
-        movieCard.innerHTML = `
-          <img 
-            src="${movie.poster_path 
-              ? IMG_URL + movie.poster_path 
-              : 'https://via.placeholder.com/300x450?text=Sin+Imagen'}"
-            alt="${movie.title}"
-          />
+        card.innerHTML = `
+          <img src="${
+            movie.poster_path
+              ? IMG_URL + movie.poster_path
+              : 'https://via.placeholder.com/300x450?text=Sin+Imagen'
+          }" alt="${movie.title}">
           <h3>${movie.title}</h3>
-        `
+        `;
 
-        moviesContainer.appendChild(movieCard)
-      })
+        moviesContainer.appendChild(card);
+      });
     }
 
-    // Ejecutar al cargar la página
-    getPopularMovies()
+    getPopularMovies();
   </script>
 
 </body>
 </html>
+
+
 
 
 
