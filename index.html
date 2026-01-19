@@ -9,46 +9,41 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #0b1c2d;
-  color: #fff;
+  color: white;
 }
 
 header {
-  padding: 25px;
-  text-align: center;
   background: #071421;
+  padding: 20px;
+  text-align: center;
 }
 
-header h1 {
-  margin: 0;
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
-header p {
-  opacity: .8;
+nav a {
+  color: #9fc5ff;
+  text-decoration: none;
+  font-weight: bold;
 }
 
-input {
-  width: 90%;
-  max-width: 500px;
-  padding: 12px;
-  font-size: 16px;
-  margin-top: 15px;
-  border-radius: 6px;
-  border: none;
+nav a:hover {
+  text-decoration: underline;
 }
 
-section {
+main {
   padding: 25px;
-}
-
-h2 {
-  border-bottom: 1px solid #1e3a5f;
-  padding-bottom: 6px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
 }
 
 .card img {
@@ -59,40 +54,24 @@ h2 {
 }
 
 .card img:hover {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.92);
-  display: none;
-  overflow-y: auto;
+h2 {
+  border-bottom: 1px solid #1e3a5f;
+  padding-bottom: 5px;
 }
 
-.modal-content {
+.detail {
   max-width: 900px;
-  margin: 40px auto;
-  background: #071421;
-  padding: 25px;
-  border-radius: 12px;
+  margin: auto;
 }
 
-.modal img {
-  width: 220px;
+.detail img {
+  width: 260px;
+  border-radius: 12px;
   float: left;
   margin-right: 25px;
-  border-radius: 12px;
-}
-
-.close {
-  float: right;
-  font-size: 26px;
-  cursor: pointer;
 }
 
 .stars span {
@@ -107,17 +86,16 @@ h2 {
 
 textarea {
   width: 100%;
-  min-height: 90px;
-  margin-top: 10px;
+  min-height: 100px;
 }
 
 button {
   padding: 10px 15px;
+  margin-top: 10px;
   background: #1e90ff;
   border: none;
   color: white;
   cursor: pointer;
-  margin-top: 10px;
 }
 </style>
 </head>
@@ -127,157 +105,137 @@ button {
 <header>
   <h1>🎬 Escena 24</h1>
   <p>Cine, series, anime y cultura cinematográfica</p>
-  <input id="search" placeholder="Buscar en todo el catálogo...">
+
+  <nav>
+    <a href="#new">Películas nuevas</a>
+    <a href="#anime">Anime</a>
+    <a href="#series">Series</a>
+    <a href="#classic">Películas clásicas</a>
+    <a href="#mexico">Cine de Oro Mexicano</a>
+  </nav>
 </header>
 
-<section>
-  <h2>🔎 Resultados de búsqueda</h2>
-  <div class="grid" id="searchResults"></div>
-</section>
-
-<section>
-  <h2>🎞 Cine clásico y de autor</h2>
-  <div class="grid" id="classic"></div>
-</section>
-
-<section>
-  <h2>📺 Series</h2>
-  <div class="grid" id="series"></div>
-</section>
-
-<section>
-  <h2>🎌 Anime</h2>
-  <div class="grid" id="anime"></div>
-</section>
-
-<section>
-  <h2>🎥 Cine contemporáneo</h2>
-  <div class="grid" id="modern"></div>
-</section>
-
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">✖</span>
-    <img id="modalImg">
-    <h2 id="modalTitle"></h2>
-    <p id="modalInfo"></p>
-    <p id="modalOverview"></p>
-
-    <h3>⭐ Tu puntuación</h3>
-    <div class="stars" id="stars"></div>
-
-    <h3>✍ Reseña</h3>
-    <textarea id="review"></textarea>
-    <button onclick="saveReview()">Guardar reseña</button>
-  </div>
-</div>
+<main id="app"></main>
 
 <script>
 const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330";
 const IMG = "https://image.tmdb.org/t/p/w500";
+const app = document.getElementById("app");
 
-const classic = document.getElementById("classic");
-const series = document.getElementById("series");
-const anime = document.getElementById("anime");
-const modern = document.getElementById("modern");
-const searchResults = document.getElementById("searchResults");
+/* ---------------- ROUTER ---------------- */
+window.addEventListener("load", router);
+window.addEventListener("hashchange", router);
 
-function fetchSection(url, container) {
+function router() {
+  const hash = location.hash;
+
+  if (hash.startsWith("#movie/") || hash.startsWith("#tv/")) {
+    const [type, id] = hash.replace("#","").split("/");
+    renderDetail(type, id);
+  } else {
+    renderCategory(hash.replace("#","") || "new");
+  }
+}
+
+/* ---------------- CATEGORÍAS ---------------- */
+const categories = {
+  new: `discover/movie?primary_release_date.gte=2022`,
+  anime: `discover/movie?with_genres=16`,
+  series: `discover/tv`,
+  classic: `discover/movie?primary_release_date.lte=1980`,
+  mexico: `discover/movie?with_original_language=es&primary_release_date.lte=1970`
+};
+
+function renderCategory(cat) {
+  app.innerHTML = `<h2>${getTitle(cat)}</h2><div class="grid" id="grid"></div>`;
+  loadAllPages(cat, 1);
+}
+
+function loadAllPages(cat, page) {
+  const url = `https://api.themoviedb.org/3/${categories[cat]}&api_key=${API_KEY}&language=es-MX&page=${page}`;
   fetch(url)
     .then(r => r.json())
     .then(data => {
+      const grid = document.getElementById("grid");
       data.results.forEach(item => {
         if (!item.poster_path) return;
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = `<img src="${IMG + item.poster_path}">`;
-        div.onclick = () => openModal(item);
-        container.appendChild(div);
+        div.onclick = () => {
+          location.hash = `#${item.media_type || (cat === "series" ? "tv":"movie")}/${item.id}`;
+        };
+        grid.appendChild(div);
       });
+      if (page < data.total_pages && page < 5) {
+        loadAllPages(cat, page + 1);
+      }
     });
 }
 
-/* Cargar catálogo base */
-fetchSection(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=es-MX&sort_by=popularity.desc&primary_release_date.lte=1985`, classic);
-
-fetchSection(`https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&language=es-MX&sort_by=popularity.desc`, series);
-
-fetchSection(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=es-MX&with_genres=16`, anime);
-
-fetchSection(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=es-MX&primary_release_date.gte=2000`, modern);
-
-/* Búsqueda */
-document.getElementById("search").addEventListener("keyup", e => {
-  if (e.key === "Enter") {
-    searchResults.innerHTML = "";
-    fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-MX&query=${e.target.value}`)
-      .then(r => r.json())
-      .then(data => {
-        data.results.forEach(item => {
-          if (!item.poster_path) return;
-          const div = document.createElement("div");
-          div.className = "card";
-          div.innerHTML = `<img src="${IMG + item.poster_path}">`;
-          div.onclick = () => openModal(item);
-          searchResults.appendChild(div);
-        });
-      });
-  }
-});
-
-/* Modal */
-function openModal(item) {
-  document.getElementById("modal").style.display = "block";
-  document.getElementById("modalImg").src = IMG + item.poster_path;
-  document.getElementById("modalTitle").innerText = item.title || item.name;
-  document.getElementById("modalOverview").innerText = item.overview || "Sin descripción";
-
-  const year = (item.release_date || item.first_air_date || "").split("-")[0];
-  document.getElementById("modalInfo").innerText = `${item.media_type || "CATÁLOGO"} · ${year}`;
-
-  loadStars(item.id);
-  loadReview(item.id);
+function getTitle(cat) {
+  return {
+    new: "🎥 Películas nuevas",
+    anime: "🎌 Anime",
+    series: "📺 Series",
+    classic: "🎞 Películas clásicas",
+    mexico: "🇲🇽 Cine de Oro Mexicano"
+  }[cat];
 }
 
-function closeModal() {
-  document.getElementById("modal").style.display = "none";
+/* ---------------- DETALLE ---------------- */
+function renderDetail(type, id) {
+  fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=es-MX`)
+    .then(r => r.json())
+    .then(data => {
+      app.innerHTML = `
+        <div class="detail">
+          <button onclick="history.back()">⬅ Volver</button>
+          <h2>${data.title || data.name}</h2>
+          <img src="${IMG + data.poster_path}">
+          <p><strong>Año:</strong> ${(data.release_date || data.first_air_date || "").slice(0,4)}</p>
+          <p><strong>Descripción:</strong> ${data.overview || "Sin descripción"}</p>
+
+          <h3>⭐ Tu puntuación</h3>
+          <div class="stars" id="stars"></div>
+
+          <h3>✍ Reseña</h3>
+          <textarea id="review"></textarea>
+          <button onclick="saveReview(${id})">Guardar reseña</button>
+        </div>
+      `;
+      loadStars(id);
+      document.getElementById("review").value = localStorage.getItem("review_"+id) || "";
+    });
 }
 
-/* Rating */
+/* ---------------- ESTRELLAS ---------------- */
 function loadStars(id) {
-  const c = document.getElementById("stars");
-  c.innerHTML = "";
-  let saved = localStorage.getItem("rating_" + id) || 0;
+  const stars = document.getElementById("stars");
+  stars.innerHTML = "";
+  let rating = localStorage.getItem("rating_"+id) || 0;
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i=1;i<=5;i++) {
     const s = document.createElement("span");
     s.innerText = "★";
-    if (i <= saved) s.classList.add("active");
+    if (i <= rating) s.classList.add("active");
     s.onclick = () => {
-      localStorage.setItem("rating_" + id, i);
+      localStorage.setItem("rating_"+id, i);
       loadStars(id);
     };
-    c.appendChild(s);
+    stars.appendChild(s);
   }
 }
 
-/* Reseñas */
-function saveReview() {
-  const title = document.getElementById("modalTitle").innerText;
-  localStorage.setItem("review_" + title, document.getElementById("review").value);
+/* ---------------- RESEÑA ---------------- */
+function saveReview(id) {
+  localStorage.setItem("review_"+id, document.getElementById("review").value);
   alert("Reseña guardada");
-}
-
-function loadReview(id) {
-  document.getElementById("review").value = localStorage.getItem("review_" + id) || "";
 }
 </script>
 
 </body>
 </html>
-
-
 
 
 
