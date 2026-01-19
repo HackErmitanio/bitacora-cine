@@ -17,6 +17,12 @@
       text-align: center;
     }
 
+    #status {
+      text-align: center;
+      padding: 1rem;
+      font-weight: bold;
+    }
+
     #movies {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -55,29 +61,54 @@
     <p>Cine, series, anime y cultura cinematográfica</p>
   </header>
 
+  <!-- MENSAJE DE ESTADO -->
+  <div id="status">⏳ Conectando con TMDB…</div>
+
+  <!-- CONTENEDOR DE PELÍCULAS -->
   <main id="movies"></main>
 
   <script>
-    // 🔑 PEGA AQUÍ TU API KEY REAL DE TMDB
+    /*************************************************
+     * 1️⃣ PEGA AQUÍ TU API KEY REAL DE TMDB (v3)
+     *************************************************/
     const API_KEY = 382a4cfe7ac6344821ba9b1c4c9f2661;
 
     const BASE_URL = "https://api.themoviedb.org/3";
     const IMG_URL = "https://image.tmdb.org/t/p/w500";
 
     const moviesContainer = document.getElementById("movies");
+    const statusDiv = document.getElementById("status");
 
+    // 2️⃣ FUNCIÓN PRINCIPAL
     async function getPopularMovies() {
       try {
         const response = await fetch(
           `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-MX&page=1`
         );
+
+        // Si TMDB responde pero con error (401, 403, etc.)
+        if (!response.ok) {
+          throw new Error("TMDB respondió con error HTTP " + response.status);
+        }
+
         const data = await response.json();
+
+        // Si no hay resultados
+        if (!data.results || data.results.length === 0) {
+          statusDiv.textContent = "⚠️ TMDB respondió, pero no hay películas.";
+          return;
+        }
+
+        statusDiv.textContent = "✅ TMDB conectado correctamente";
         renderMovies(data.results);
+
       } catch (error) {
-        console.error("Error al cargar películas:", error);
+        console.error(error);
+        statusDiv.textContent = "❌ Error al conectar con TMDB. Revisa la API Key.";
       }
     }
 
+    // 3️⃣ DIBUJAR LAS PELÍCULAS
     function renderMovies(movies) {
       moviesContainer.innerHTML = "";
 
@@ -98,6 +129,7 @@
       });
     }
 
+    // 4️⃣ EJECUCIÓN
     getPopularMovies();
   </script>
 
