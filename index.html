@@ -13,7 +13,7 @@ body {
 }
 
 header {
-  padding: 20px;
+  padding: 25px;
   text-align: center;
   background: #071421;
 }
@@ -22,52 +22,54 @@ header h1 {
   margin: 0;
 }
 
+header p {
+  opacity: .8;
+}
+
 input {
   width: 90%;
   max-width: 500px;
-  padding: 10px;
+  padding: 12px;
   font-size: 16px;
   margin-top: 15px;
-  border-radius: 5px;
+  border-radius: 6px;
   border: none;
 }
 
 section {
-  padding: 20px;
+  padding: 25px;
 }
 
 h2 {
   border-bottom: 1px solid #1e3a5f;
-  padding-bottom: 5px;
+  padding-bottom: 6px;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.card {
-  cursor: pointer;
+  gap: 18px;
 }
 
 .card img {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
+  cursor: pointer;
   transition: transform .2s;
 }
 
 .card img:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0,0,0,0.92);
   display: none;
   overflow-y: auto;
 }
@@ -76,25 +78,25 @@ h2 {
   max-width: 900px;
   margin: 40px auto;
   background: #071421;
-  padding: 20px;
-  border-radius: 10px;
+  padding: 25px;
+  border-radius: 12px;
 }
 
 .modal img {
-  width: 200px;
+  width: 220px;
   float: left;
-  margin-right: 20px;
-  border-radius: 10px;
+  margin-right: 25px;
+  border-radius: 12px;
 }
 
 .close {
   float: right;
-  font-size: 25px;
+  font-size: 26px;
   cursor: pointer;
 }
 
 .stars span {
-  font-size: 25px;
+  font-size: 26px;
   cursor: pointer;
   color: gray;
 }
@@ -105,12 +107,12 @@ h2 {
 
 textarea {
   width: 100%;
-  min-height: 80px;
+  min-height: 90px;
   margin-top: 10px;
 }
 
 button {
-  padding: 10px;
+  padding: 10px 15px;
   background: #1e90ff;
   border: none;
   color: white;
@@ -125,14 +127,35 @@ button {
 <header>
   <h1>🎬 Escena 24</h1>
   <p>Cine, series, anime y cultura cinematográfica</p>
-  <input id="search" placeholder="Buscar película, serie o anime...">
+  <input id="search" placeholder="Buscar en todo el catálogo...">
 </header>
 
 <section>
-  <h2>Resultados</h2>
-  <div class="grid" id="results"></div>
+  <h2>🔎 Resultados de búsqueda</h2>
+  <div class="grid" id="searchResults"></div>
 </section>
 
+<section>
+  <h2>🎞 Cine clásico y de autor</h2>
+  <div class="grid" id="classic"></div>
+</section>
+
+<section>
+  <h2>📺 Series</h2>
+  <div class="grid" id="series"></div>
+</section>
+
+<section>
+  <h2>🎌 Anime</h2>
+  <div class="grid" id="anime"></div>
+</section>
+
+<section>
+  <h2>🎥 Cine contemporáneo</h2>
+  <div class="grid" id="modern"></div>
+</section>
+
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">✖</span>
@@ -151,34 +174,59 @@ button {
 </div>
 
 <script>
-const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330";
+const API_KEY = "TU_API_KEY_AQUI";
 const IMG = "https://image.tmdb.org/t/p/w500";
-const results = document.getElementById("results");
 
+const classic = document.getElementById("classic");
+const series = document.getElementById("series");
+const anime = document.getElementById("anime");
+const modern = document.getElementById("modern");
+const searchResults = document.getElementById("searchResults");
+
+function fetchSection(url, container) {
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      data.results.forEach(item => {
+        if (!item.poster_path) return;
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<img src="${IMG + item.poster_path}">`;
+        div.onclick = () => openModal(item);
+        container.appendChild(div);
+      });
+    });
+}
+
+/* Cargar catálogo base */
+fetchSection(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=es-MX&sort_by=popularity.desc&primary_release_date.lte=1985`, classic);
+
+fetchSection(`https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&language=es-MX&sort_by=popularity.desc`, series);
+
+fetchSection(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=es-MX&with_genres=16`, anime);
+
+fetchSection(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=es-MX&primary_release_date.gte=2000`, modern);
+
+/* Búsqueda */
 document.getElementById("search").addEventListener("keyup", e => {
-  if (e.key === "Enter") search(e.target.value);
+  if (e.key === "Enter") {
+    searchResults.innerHTML = "";
+    fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-MX&query=${e.target.value}`)
+      .then(r => r.json())
+      .then(data => {
+        data.results.forEach(item => {
+          if (!item.poster_path) return;
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `<img src="${IMG + item.poster_path}">`;
+          div.onclick = () => openModal(item);
+          searchResults.appendChild(div);
+        });
+      });
+  }
 });
 
-function search(query) {
-  results.innerHTML = "⏳ Buscando...";
-  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-MX&query=${query}`)
-    .then(r => r.json())
-    .then(data => showResults(data.results));
-}
-
-function showResults(items) {
-  results.innerHTML = "";
-  items.forEach(item => {
-    if (!item.poster_path) return;
-
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<img src="${IMG + item.poster_path}">`;
-    div.onclick = () => openModal(item);
-    results.appendChild(div);
-  });
-}
-
+/* Modal */
 function openModal(item) {
   document.getElementById("modal").style.display = "block";
   document.getElementById("modalImg").src = IMG + item.poster_path;
@@ -186,7 +234,7 @@ function openModal(item) {
   document.getElementById("modalOverview").innerText = item.overview || "Sin descripción";
 
   const year = (item.release_date || item.first_air_date || "").split("-")[0];
-  document.getElementById("modalInfo").innerText = `${item.media_type.toUpperCase()} · ${year}`;
+  document.getElementById("modalInfo").innerText = `${item.media_type || "CATÁLOGO"} · ${year}`;
 
   loadStars(item.id);
   loadReview(item.id);
@@ -196,9 +244,10 @@ function closeModal() {
   document.getElementById("modal").style.display = "none";
 }
 
+/* Rating */
 function loadStars(id) {
-  const container = document.getElementById("stars");
-  container.innerHTML = "";
+  const c = document.getElementById("stars");
+  c.innerHTML = "";
   let saved = localStorage.getItem("rating_" + id) || 0;
 
   for (let i = 1; i <= 5; i++) {
@@ -209,10 +258,11 @@ function loadStars(id) {
       localStorage.setItem("rating_" + id, i);
       loadStars(id);
     };
-    container.appendChild(s);
+    c.appendChild(s);
   }
 }
 
+/* Reseñas */
 function saveReview() {
   const title = document.getElementById("modalTitle").innerText;
   localStorage.setItem("review_" + title, document.getElementById("review").value);
@@ -226,6 +276,8 @@ function loadReview(id) {
 
 </body>
 </html>
+
+
 
 
 
