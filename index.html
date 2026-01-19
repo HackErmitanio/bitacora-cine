@@ -4,137 +4,214 @@
   <meta charset="UTF-8">
   <title>Escena 24</title>
 
+  <!-- =========================
+       CSS – ESTILOS
+  ========================== -->
   <style>
     body {
+      background-color: #0d1b2a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      text-align: center;
       margin: 0;
-      font-family: system-ui, sans-serif;
-      background: #0b0f1a;
-      color: #e5e7eb;
+      padding: 0;
     }
 
-    header {
-      padding: 2rem;
-      text-align: center;
+    h1 {
+      margin-top: 20px;
+      font-size: 2.5rem;
     }
 
-    #status {
-      text-align: center;
-      padding: 1rem;
-      font-weight: bold;
+    p {
+      opacity: 0.85;
     }
 
-    #movies {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
+    /* Botones de categorías */
+    #categories {
+      margin: 20px;
     }
 
-    .movie-card {
-      background: #111827;
-      border-radius: 12px;
-      overflow: hidden;
-      transition: transform 0.2s ease;
+    #categories button {
+      margin: 6px;
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #1b263b;
+      color: white;
+      transition: background 0.2s, transform 0.2s;
     }
 
-    .movie-card:hover {
+    #categories button:hover {
+      background-color: #415a77;
       transform: scale(1.05);
     }
 
-    .movie-card img {
-      width: 100%;
-      display: block;
+    /* Estado */
+    #status {
+      margin: 15px;
+      font-size: 15px;
     }
 
-    .movie-card h3 {
-      font-size: 0.95rem;
-      padding: 0.8rem;
-      text-align: center;
+    /* Grid de posters */
+    #movies {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    /* Tarjetas */
+    .movie {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .movie:hover {
+      transform: scale(1.05);
+    }
+
+    .movie img {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .movie h3 {
+      font-size: 14px;
+      margin-top: 8px;
     }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <h1>🎬 Escena 24</h1>
-    <p>Cine, series, anime y cultura cinematográfica</p>
-  </header>
+  <!-- =========================
+       CONTENIDO HTML
+  ========================== -->
 
-  <!-- MENSAJE DE ESTADO -->
-  <div id="status">⏳ Conectando con TMDB…</div>
+  <h1>Escena 24</h1>
+  <p>Cine, series, anime y cultura cinematográfica</p>
 
-  <!-- CONTENEDOR DE PELÍCULAS -->
-  <main id="movies"></main>
+  <!-- Categorías -->
+  <div id="categories">
+    <button onclick="cargarPeliculas()">🎬 Películas</button>
+    <button onclick="cargarSeries()">📺 Series</button>
+    <button onclick="cargarAnime()">🍥 Anime</button>
+    <button onclick="cargarClasicos()">🕰️ Clásicos</button>
+  </div>
 
+  <!-- Estado -->
+  <p id="status">Selecciona una categoría</p>
+
+  <!-- Contenedor -->
+  <div id="movies"></div>
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================== -->
   <script>
-    /*************************************************
-     * 1️⃣ PEGA AQUÍ TU API KEY REAL DE TMDB (v3)
-     *************************************************/
+    /* =========================
+       CONFIGURACIÓN
+    ========================== */
+
+    // ⚠️ REEMPLAZA POR TU API KEY DE TMDB (CON COMILLAS)
     const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330";
 
     const BASE_URL = "https://api.themoviedb.org/3";
     const IMG_URL = "https://image.tmdb.org/t/p/w500";
 
-    const moviesContainer = document.getElementById("movies");
-    const statusDiv = document.getElementById("status");
+    const container = document.getElementById("movies");
+    const status = document.getElementById("status");
 
-    // 2️⃣ FUNCIÓN PRINCIPAL
-    async function getPopularMovies() {
+    /* =========================
+       FUNCIONES BASE
+    ========================== */
+
+    // Limpia pantalla antes de cargar algo nuevo
+    function limpiarPantalla() {
+      container.innerHTML = "";
+      status.textContent = "⏳ Cargando...";
+    }
+
+    // Función genérica para cargar contenido
+    async function cargarContenido(url, tipo = "movie") {
+      limpiarPantalla();
+
       try {
-        const response = await fetch(
-          `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-MX&page=1`
-        );
-
-        // Si TMDB responde pero con error (401, 403, etc.)
-        if (!response.ok) {
-          throw new Error("TMDB respondió con error HTTP " + response.status);
-        }
-
+        const response = await fetch(url);
         const data = await response.json();
 
-        // Si no hay resultados
-        if (!data.results || data.results.length === 0) {
-          statusDiv.textContent = "⚠️ TMDB respondió, pero no hay películas.";
-          return;
-        }
+        status.textContent = "🎬 Resultados";
 
-        statusDiv.textContent = "✅ TMDB conectado correctamente";
-        renderMovies(data.results);
+        data.results.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "movie";
+
+          // title = películas | name = series/anime
+          const titulo = tipo === "tv" ? item.name : item.title;
+
+          card.innerHTML = `
+            <img src="${IMG_URL + item.poster_path}" alt="${titulo}">
+            <h3>${titulo}</h3>
+          `;
+
+          card.onclick = () => {
+            alert(
+              `🎬 ${titulo}\n\n${item.overview || "Sin descripción disponible."}`
+            );
+          };
+
+          container.appendChild(card);
+        });
 
       } catch (error) {
+        status.textContent = "❌ Error al cargar contenido";
         console.error(error);
-        statusDiv.textContent = "❌ Error al conectar con TMDB. Revisa la API Key.";
       }
     }
 
-    // 3️⃣ DIBUJAR LAS PELÍCULAS
-    function renderMovies(movies) {
-      moviesContainer.innerHTML = "";
+    /* =========================
+       CATEGORÍAS
+    ========================== */
 
-      movies.forEach(movie => {
-        const card = document.createElement("div");
-        card.className = "movie-card";
-
-        card.innerHTML = `
-          <img src="${
-            movie.poster_path
-              ? IMG_URL + movie.poster_path
-              : 'https://via.placeholder.com/300x450?text=Sin+Imagen'
-          }" alt="${movie.title}">
-          <h3>${movie.title}</h3>
-        `;
-
-        moviesContainer.appendChild(card);
-      });
+    // 🎬 Películas
+    function cargarPeliculas() {
+      cargarContenido(
+        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-MX`
+      );
     }
 
-    // 4️⃣ EJECUCIÓN
-    getPopularMovies();
+    // 📺 Series
+    function cargarSeries() {
+      cargarContenido(
+        `${BASE_URL}/tv/popular?api_key=${API_KEY}&language=es-MX`,
+        "tv"
+      );
+    }
+
+    // 🍥 Anime
+    function cargarAnime() {
+      cargarContenido(
+        `${BASE_URL}/discover/tv?api_key=${API_KEY}&language=es-MX&with_genres=16&with_origin_country=JP`,
+        "tv"
+      );
+    }
+
+    // 🕰️ Clásicos
+    function cargarClasicos() {
+      cargarContenido(
+        `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=es-MX&primary_release_date.lte=1970-12-31&sort_by=popularity.desc`
+      );
+    }
   </script>
 
 </body>
 </html>
+
+
 
 
 
