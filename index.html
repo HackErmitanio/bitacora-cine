@@ -2,49 +2,119 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-
-  <!-- Hace que se vea bien en celular -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Título de la pestaña -->
   <title>Escena 24</title>
 
-  <!-- Estilos -->
-  <link rel="stylesheet" href="style.css">
+  <!-- ESTILOS (CSS) -->
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #0b0f1a;
+      color: #e5e7eb;
+    }
+
+    header {
+      padding: 2rem;
+      text-align: center;
+    }
+
+    #movies {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    .movie-card {
+      background: #111827;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+
+    .movie-card:hover {
+      transform: scale(1.05);
+    }
+
+    .movie-card img {
+      width: 100%;
+      display: block;
+    }
+
+    .movie-card h3 {
+      font-size: 0.95rem;
+      padding: 0.8rem;
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
 
   <!-- ENCABEZADO -->
   <header>
-    <h1>Escena 24 </h1>
+    <h1>🎬 Escena 24</h1>
     <p>Cine, series, anime y cultura cinematográfica</p>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main>
+  <!-- CONTENEDOR DE PELÍCULAS -->
+  <main id="movies"></main>
 
-    <section>
+  <!-- JAVASCRIPT -->
+  <script type="module">
+    // API Key desde las variables de entorno de Vercel
+    const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
-      <article>
-        <h2>Entrada de ejemplo</h2>
-        <p>
-          Este será el espacio donde escribirás reflexiones
-          sobre una película, serie o anime.
-        </p>
-      </article>
+    // URLs base
+    const BASE_URL = "https://api.themoviedb.org/3"
+    const IMG_URL = "https://image.tmdb.org/t/p/w500"
 
-    </section>
+    // Contenedor donde se mostrarán las películas
+    const moviesContainer = document.getElementById("movies")
 
-  </main>
+    // Obtener películas populares
+    async function getPopularMovies() {
+      try {
+        const response = await fetch(
+          `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-MX&page=1`
+        )
 
-  <!-- PIE -->
-  <footer>
-    <p>© Escena 24</p>
-  </footer>
+        const data = await response.json()
+        renderMovies(data.results)
 
-  <!-- JS -->
-  <script src="app.js"></script>
+      } catch (error) {
+        console.error("Error al obtener películas:", error)
+      }
+    }
+
+    // Dibujar tarjetas de películas
+    function renderMovies(movies) {
+      moviesContainer.innerHTML = ""
+
+      movies.forEach(movie => {
+        const movieCard = document.createElement("div")
+        movieCard.className = "movie-card"
+
+        movieCard.innerHTML = `
+          <img 
+            src="${movie.poster_path 
+              ? IMG_URL + movie.poster_path 
+              : 'https://via.placeholder.com/300x450?text=Sin+Imagen'}"
+            alt="${movie.title}"
+          />
+          <h3>${movie.title}</h3>
+        `
+
+        moviesContainer.appendChild(movieCard)
+      })
+    }
+
+    // Ejecutar al cargar la página
+    getPopularMovies()
+  </script>
+
 </body>
 </html>
+
 
 
