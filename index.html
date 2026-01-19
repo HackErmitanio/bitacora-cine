@@ -246,7 +246,7 @@ button{
 </div>
 
 <script>
-const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330";
+const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330"; // 
 const IMG = "https://image.tmdb.org/t/p/w500";
 const app = document.getElementById("app");
 const modal = document.getElementById("modal");
@@ -255,7 +255,6 @@ const modalContent = document.getElementById("modal-content");
 window.addEventListener("load", router);
 window.addEventListener("hashchange", router);
 
-/* TÍTULO SCROLL */
 const titulo = document.getElementById("titulo");
 window.addEventListener("scroll", ()=>{
   let y = window.scrollY;
@@ -264,14 +263,12 @@ window.addEventListener("scroll", ()=>{
   titulo.style.filter = `drop-shadow(0 0 ${5 + y*0.1}px #ff4ecd)`;
 });
 
-/* BÚSQUEDA GLOBAL */
 document.getElementById("search").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     location.hash = "#search/"+encodeURIComponent(e.target.value);
   }
 });
 
-/* ROUTER */
 function router(){
   const h = location.hash;
   if(h.startsWith("#movie/") || h.startsWith("#tv/")){
@@ -318,13 +315,13 @@ function cargar(cat,page){
   window.pageActual=page;
   let url="";
   switch(cat){
-    case "new": url=`discover/movie?sort_by=popularity.desc`; break;
-    case "classic": url=`discover/movie?primary_release_date.lte=1980&sort_by=popularity.desc`; break;
-    case "mexico": url=`discover/movie?with_original_language=es&region=MX&sort_by=popularity.desc`; break;
-    case "series": url=`discover/tv?sort_by=popularity.desc`; break;
-    case "anime": url=`discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc`; break;
+    case "new": url=`https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&language=es-MX&page=${page}&api_key=${API_KEY}`; break;
+    case "classic": url=`https://api.themoviedb.org/3/discover/movie?primary_release_date.lte=1980&sort_by=popularity.desc&language=es-MX&page=${page}&api_key=${API_KEY}`; break;
+    case "mexico": url=`https://api.themoviedb.org/3/discover/movie?with_original_language=es&region=MX&sort_by=popularity.desc&language=es-MX&page=${page}&api_key=${API_KEY}`; break;
+    case "series": url=`https://api.themoviedb.org/3/discover/tv?sort_by=popularity.desc&language=es-MX&page=${page}&api_key=${API_KEY}`; break;
+    case "anime": url=`https://api.themoviedb.org/3/discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc&language=es-MX&page=${page}&api_key=${API_KEY}`; break;
   }
-  fetch(`https://api.themoviedb.org/3/${url}&api_key=${API_KEY}&language=es-MX&page=${page}`)
+  fetch(url)
     .then(r=>r.json())
     .then(d=>{
       const g=document.getElementById("grid");
@@ -351,7 +348,6 @@ function tituloCat(c){
   }[c];
 }
 
-/* MODAL DETALLE */
 function detalleModal(type,id){
   Promise.all([
     fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=es-MX`).then(r=>r.json()),
@@ -376,7 +372,6 @@ function detalleModal(type,id){
           <p><strong>Géneros:</strong> ${d.genres.map(g=>g.name).join(", ")}</p>
           <p><strong>Reparto principal:</strong> ${mainCast}</p>
           <p><strong>Popularidad TMDB:</strong> ${d.popularity}</p>
-
           <h3>⭐ Tu puntuación</h3>
           <div class="stars" id="stars"></div>
           <h3>📝 Reseña guiada</h3>
@@ -426,5 +421,6 @@ function guardar(id){
 </script>
 </body>
 </html>
+
 
 
