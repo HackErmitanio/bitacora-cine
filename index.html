@@ -5,135 +5,174 @@
 <title>Escena 24</title>
 
 <style>
-:root {
-  --bg: #0b1c2d;
-  --panel: #071421;
-  --accent: #cfae70;
-  --text: #f1f1f1;
+:root{
+  --bg:#0f0c29;
+  --bg2:#302b63;
+  --bg3:#24243e;
+  --card:#1b1b3a;
+  --accent:#ff4ecd;
+  --accent2:#00f5d4;
+  --text:#ffffff;
 }
 
-body {
-  margin: 0;
-  font-family: "Georgia", serif;
-  background: var(--bg);
-  color: var(--text);
+body{
+  margin:0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(120deg,var(--bg),var(--bg2),var(--bg3));
+  color:var(--text);
 }
 
-header {
-  background: linear-gradient(180deg, #071421, #020a12);
-  padding: 30px;
-  text-align: center;
+header{
+  padding:30px;
+  text-align:center;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 2.5rem;
-  letter-spacing: 2px;
+header h1{
+  margin:0;
+  font-size:3rem;
+  background: linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 
-header p {
-  opacity: .8;
-  margin-top: 5px;
+header p{
+  opacity:.85;
 }
 
-nav {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  gap: 25px;
-  flex-wrap: wrap;
+nav{
+  margin-top:20px;
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
 }
 
-nav a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: bold;
+nav a{
+  background:var(--card);
+  padding:10px 18px;
+  border-radius:30px;
+  text-decoration:none;
+  color:white;
+  font-weight:bold;
+  transition:.3s;
 }
 
-nav a:hover {
-  text-decoration: underline;
+nav a:hover{
+  background:var(--accent);
 }
 
-main {
-  padding: 40px;
+.search-box{
+  margin-top:25px;
 }
 
-h2 {
-  border-left: 5px solid var(--accent);
-  padding-left: 10px;
-  margin-bottom: 20px;
+.search-box input{
+  width:90%;
+  max-width:500px;
+  padding:14px;
+  border-radius:30px;
+  border:none;
+  font-size:16px;
+  outline:none;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 22px;
+main{
+  padding:30px;
 }
 
-.card {
-  text-align: center;
+h2{
+  margin-bottom:20px;
+  color:var(--accent2);
 }
 
-.card img {
-  width: 100%;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform .3s, box-shadow .3s;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:22px;
 }
 
-.card img:hover {
-  transform: scale(1.06);
-  box-shadow: 0 10px 25px rgba(0,0,0,.6);
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
+  transition:.3s;
 }
 
-.card span {
-  font-size: .85rem;
-  opacity: .8;
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 15px 30px rgba(0,0,0,.5);
+}
+
+.card img{
+  width:100%;
+  border-radius:12px;
+}
+
+.card span{
+  display:block;
+  margin-top:8px;
+  font-size:.9rem;
 }
 
 /* DETALLE */
-.detail {
-  max-width: 1000px;
-  margin: auto;
+.detail{
+  max-width:1100px;
+  margin:auto;
 }
 
-.detail img {
-  width: 280px;
-  float: left;
-  margin-right: 30px;
-  border-radius: 14px;
+.detail-header{
+  display:flex;
+  flex-wrap:wrap;
+  gap:30px;
 }
 
-.stars span {
-  font-size: 28px;
-  cursor: pointer;
-  color: gray;
+.detail-header img{
+  width:300px;
+  border-radius:18px;
 }
 
-.stars span.active {
-  color: gold;
+.detail-info{
+  flex:1;
 }
 
-textarea {
-  width: 100%;
-  min-height: 120px;
-  background: #020a12;
-  color: white;
-  border: 1px solid #333;
-  padding: 10px;
+.badge{
+  display:inline-block;
+  background:var(--accent);
+  padding:5px 12px;
+  border-radius:20px;
+  margin-right:8px;
+  font-size:.8rem;
 }
 
-button {
-  background: var(--accent);
-  color: black;
-  border: none;
-  padding: 10px 16px;
-  margin-top: 10px;
-  cursor: pointer;
+.stars span{
+  font-size:30px;
+  cursor:pointer;
+  color:#555;
 }
 
-button:hover {
-  opacity: .85;
+.stars span.active{
+  color:gold;
+}
+
+textarea{
+  width:100%;
+  min-height:120px;
+  border-radius:12px;
+  border:none;
+  padding:12px;
+  font-size:15px;
+}
+
+button{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border:none;
+  padding:12px 20px;
+  border-radius:30px;
+  color:black;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -142,15 +181,19 @@ button:hover {
 
 <header>
   <h1>ESCENA 24</h1>
-  <p>Archivo cinematográfico · crítica · memoria</p>
+  <p>Cine, series, anime y cultura pop</p>
 
   <nav>
     <a href="#new">Películas nuevas</a>
     <a href="#anime">Anime</a>
     <a href="#series">Series</a>
-    <a href="#classic">Cine clásico</a>
-    <a href="#mexico">Cine de Oro Mexicano</a>
+    <a href="#classic">Clásicas</a>
+    <a href="#mexico">Cine mexicano</a>
   </nav>
+
+  <div class="search-box">
+    <input id="search" placeholder="Buscar películas o series...">
+  </div>
 </header>
 
 <main id="app"></main>
@@ -163,113 +206,138 @@ const app = document.getElementById("app");
 window.addEventListener("load", router);
 window.addEventListener("hashchange", router);
 
-function router() {
+/* ROUTER */
+function router(){
   const h = location.hash;
 
-  if (h.startsWith("#movie/") || h.startsWith("#tv/")) {
-    const [t, id] = h.replace("#","").split("/");
-    detalle(t, id);
-  } else {
+  if(h.startsWith("#movie/") || h.startsWith("#tv/")){
+    const [t,id] = h.replace("#","").split("/");
+    detalle(t,id);
+  }else if(h.startsWith("#search/")){
+    buscar(decodeURIComponent(h.split("/")[1]));
+  }else{
     catalogo(h.replace("#","") || "new");
   }
 }
 
-/* ---------------- CATÁLOGO ---------------- */
+/* BÚSQUEDA */
+document.getElementById("search").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    location.hash = "#search/"+encodeURIComponent(e.target.value);
+  }
+});
 
-function catalogo(cat) {
-  app.innerHTML = `<h2>${tit(cat)}</h2><div class="grid" id="grid"></div>`;
-  cargar(cat, 1);
+function buscar(q){
+  app.innerHTML = `<h2>🔎 Resultados para "${q}"</h2><div class="grid" id="grid"></div>`;
+  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-MX&query=${q}`)
+    .then(r=>r.json())
+    .then(d=>{
+      const g = document.getElementById("grid");
+      d.results.forEach(i=>{
+        if(!i.poster_path) return;
+        const c=document.createElement("div");
+        c.className="card";
+        c.innerHTML=`<img src="${IMG+i.poster_path}"><span>${i.title||i.name}</span>`;
+        c.onclick=()=>location.hash=`#${i.media_type}/${i.id}`;
+        g.appendChild(c);
+      });
+    });
 }
 
-function cargar(cat, page) {
-  const urls = {
-    new: `discover/movie?sort_by=popularity.desc&primary_release_date.gte=2021`,
-    classic: `discover/movie?primary_release_date.lte=1979`,
-    mexico: `discover/movie?with_original_language=es&region=MX&primary_release_date.lte=1970`,
-    series: `discover/tv?sort_by=popularity.desc`,
-    anime: `discover/tv?with_genres=16&with_original_language=ja`
+/* CATÁLOGO */
+function catalogo(cat){
+  app.innerHTML = `<h2>${titulo(cat)}</h2><div class="grid" id="grid"></div>`;
+  cargar(cat,1);
+}
+
+function cargar(cat,page){
+  const urls={
+    new:`discover/movie?sort_by=popularity.desc`,
+    classic:`discover/movie?primary_release_date.lte=1980`,
+    mexico:`discover/movie?with_original_language=es&region=MX&primary_release_date.lte=1970`,
+    series:`discover/tv?sort_by=popularity.desc`,
+    anime:`discover/tv?with_genres=16&with_original_language=ja`
   };
 
   fetch(`https://api.themoviedb.org/3/${urls[cat]}&api_key=${API_KEY}&language=es-MX&page=${page}`)
-    .then(r => r.json())
-    .then(d => {
-      const g = document.getElementById("grid");
-      d.results.forEach(i => {
-        if (!i.poster_path) return;
-        const c = document.createElement("div");
-        c.className = "card";
-        c.innerHTML = `
-          <img src="${IMG + i.poster_path}">
-          <span>${(i.title || i.name)}</span>
-        `;
-        c.onclick = () => {
-          location.hash = `#${cat === "series" || cat === "anime" ? "tv":"movie"}/${i.id}`;
-        };
+    .then(r=>r.json())
+    .then(d=>{
+      const g=document.getElementById("grid");
+      d.results.forEach(i=>{
+        if(!i.poster_path) return;
+        const c=document.createElement("div");
+        c.className="card";
+        c.innerHTML=`<img src="${IMG+i.poster_path}"><span>${i.title||i.name}</span>`;
+        c.onclick=()=>location.hash=`#${cat==="series"||cat==="anime"?"tv":"movie"}/${i.id}`;
         g.appendChild(c);
       });
-
-      if (page < 6) cargar(cat, page + 1);
+      if(page<8) cargar(cat,page+1); // MUCHÍSIMO contenido
     });
 }
 
-function tit(c) {
-  return {
-    new: "🎥 Películas nuevas",
-    anime: "🎌 Anime (series japonesas)",
-    series: "📺 Series",
-    classic: "🎞 Cine clásico",
-    mexico: "🇲🇽 Cine de Oro Mexicano"
+function titulo(c){
+  return{
+    new:"🎥 Películas nuevas",
+    anime:"🎌 Anime",
+    series:"📺 Series",
+    classic:"🎞 Clásicos",
+    mexico:"🇲🇽 Cine mexicano"
   }[c];
 }
 
-/* ---------------- DETALLE ---------------- */
-
-function detalle(type, id) {
-  fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=es-MX`)
-    .then(r => r.json())
-    .then(d => {
-      app.innerHTML = `
-        <div class="detail">
-          <button onclick="history.back()">⬅ Volver</button>
-          <h2>${d.title || d.name}</h2>
-          <img src="${IMG + d.poster_path}">
-          <p><strong>Año:</strong> ${(d.release_date || d.first_air_date || "").slice(0,4)}</p>
-          <p>${d.overview || "Sin descripción disponible."}</p>
-
-          <h3>⭐ Tu puntuación</h3>
-          <div class="stars" id="stars"></div>
-
-          <h3>📝 Reseña</h3>
-          <textarea id="review"></textarea>
-          <button onclick="guardar(${id})">Guardar reseña</button>
+/* DETALLE */
+function detalle(type,id){
+  Promise.all([
+    fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=es-MX`).then(r=>r.json()),
+    fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`).then(r=>r.json())
+  ]).then(([d,c])=>{
+    const director = c.crew.find(p=>p.job==="Director") || {};
+    app.innerHTML=`
+      <div class="detail">
+        <button onclick="history.back()">⬅ Volver</button>
+        <div class="detail-header">
+          <img src="${IMG+d.poster_path}">
+          <div class="detail-info">
+            <h2>${d.title||d.name}</h2>
+            <p>${d.overview||"Sin descripción."}</p>
+            <p>
+              <span class="badge">${(d.release_date||d.first_air_date||"").slice(0,4)}</span>
+              <span class="badge">${d.runtime||"?"} min</span>
+            </p>
+            <p><strong>Director:</strong> ${director.name||"No disponible"}</p>
+            <p><strong>Géneros:</strong> ${d.genres.map(g=>g.name).join(", ")}</p>
+          </div>
         </div>
-      `;
-      estrellas(id);
-      document.getElementById("review").value = localStorage.getItem("review_"+id) || "";
-    });
+
+        <h3>⭐ Tu puntuación</h3>
+        <div class="stars" id="stars"></div>
+
+        <h3>📝 Tu reseña</h3>
+        <textarea id="review"></textarea>
+        <button onclick="guardar(${id})">Guardar</button>
+      </div>
+    `;
+    estrellas(id);
+    document.getElementById("review").value = localStorage.getItem("review_"+id)||"";
+  });
 }
 
-/* ---------------- RATING ---------------- */
-
-function estrellas(id) {
-  const s = document.getElementById("stars");
-  s.innerHTML = "";
-  let r = localStorage.getItem("rating_"+id) || 0;
-
-  for (let i=1;i<=5;i++) {
-    const e = document.createElement("span");
-    e.innerText = "★";
-    if (i <= r) e.classList.add("active");
-    e.onclick = () => {
-      localStorage.setItem("rating_"+id, i);
-      estrellas(id);
-    };
+/* ESTRELLAS */
+function estrellas(id){
+  const s=document.getElementById("stars");
+  s.innerHTML="";
+  let r=localStorage.getItem("rating_"+id)||0;
+  for(let i=1;i<=5;i++){
+    const e=document.createElement("span");
+    e.innerText="★";
+    if(i<=r) e.classList.add("active");
+    e.onclick=()=>{localStorage.setItem("rating_"+id,i);estrellas(id);}
     s.appendChild(e);
   }
 }
 
-function guardar(id) {
-  localStorage.setItem("review_"+id, document.getElementById("review").value);
+function guardar(id){
+  localStorage.setItem("review_"+id,document.getElementById("review").value);
   alert("Reseña guardada");
 }
 </script>
