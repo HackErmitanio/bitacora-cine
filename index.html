@@ -25,6 +25,8 @@ body{
 header{
   padding:30px;
   text-align:center;
+  position:relative;
+  overflow:hidden;
 }
 
 header h1{
@@ -33,6 +35,13 @@ header h1{
   background: linear-gradient(90deg,var(--accent),var(--accent2));
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
+  animation:neon 2s infinite alternate;
+}
+
+@keyframes neon{
+  0%{filter: drop-shadow(0 0 5px var(--accent));}
+  50%{filter: drop-shadow(0 0 15px var(--accent2));}
+  100%{filter: drop-shadow(0 0 25px var(--accent));}
 }
 
 header p{
@@ -40,11 +49,16 @@ header p{
 }
 
 nav{
-  margin-top:20px;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
   display:flex;
   justify-content:center;
-  gap:20px;
-  flex-wrap:wrap;
+  gap:15px;
+  padding:10px;
+  background:rgba(20,20,40,.85);
+  z-index:1000;
 }
 
 nav a{
@@ -62,7 +76,7 @@ nav a:hover{
 }
 
 .search-box{
-  margin-top:25px;
+  margin-top:20px;
 }
 
 .search-box input{
@@ -76,7 +90,7 @@ nav a:hover{
 }
 
 main{
-  padding:30px;
+  padding:30px 20px 80px 20px;
 }
 
 h2{
@@ -176,25 +190,23 @@ button{
 }
 </style>
 </head>
-
 <body>
 
 <header>
   <h1>ESCENA 24</h1>
   <p>Cine, series, anime y cultura pop</p>
-
-  <nav>
-    <a href="#new">Películas nuevas</a>
-    <a href="#anime">Anime</a>
-    <a href="#series">Series</a>
-    <a href="#classic">Clásicas</a>
-    <a href="#mexico">Cine mexicano</a>
-  </nav>
-
   <div class="search-box">
     <input id="search" placeholder="Buscar películas o series...">
   </div>
 </header>
+
+<nav>
+  <a href="#new">Películas nuevas</a>
+  <a href="#anime">Anime</a>
+  <a href="#series">Series</a>
+  <a href="#classic">Clásicas</a>
+  <a href="#mexico">Cine mexicano</a>
+</nav>
 
 <main id="app"></main>
 
@@ -229,7 +241,7 @@ document.getElementById("search").addEventListener("keydown",e=>{
 
 function buscar(q){
   app.innerHTML = `<h2>🔎 Resultados para "${q}"</h2><div class="grid" id="grid"></div>`;
-  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-MX&query=${q}`)
+  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-MX&query=${q}&page=1`)
     .then(r=>r.json())
     .then(d=>{
       const g = document.getElementById("grid");
@@ -271,7 +283,7 @@ function cargar(cat,page){
         c.onclick=()=>location.hash=`#${cat==="series"||cat==="anime"?"tv":"movie"}/${i.id}`;
         g.appendChild(c);
       });
-      if(page<8) cargar(cat,page+1); // MUCHÍSIMO contenido
+      if(page<10) cargar(cat,page+1); // carga MUCHO contenido
     });
 }
 
@@ -285,13 +297,14 @@ function titulo(c){
   }[c];
 }
 
-/* DETALLE */
+/* DETALLE CON FICHA TÉCNICA AMPLIADA */
 function detalle(type,id){
   Promise.all([
     fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=es-MX`).then(r=>r.json()),
     fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`).then(r=>r.json())
   ]).then(([d,c])=>{
     const director = c.crew.find(p=>p.job==="Director") || {};
+    const mainCast = c.cast.slice(0,5).map(a=>a.name).join(", ");
     app.innerHTML=`
       <div class="detail">
         <button onclick="history.back()">⬅ Volver</button>
@@ -301,11 +314,15 @@ function detalle(type,id){
             <h2>${d.title||d.name}</h2>
             <p>${d.overview||"Sin descripción."}</p>
             <p>
-              <span class="badge">${(d.release_date||d.first_air_date||"").slice(0,4)}</span>
-              <span class="badge">${d.runtime||"?"} min</span>
+              <span class="badge">Año: ${(d.release_date||d.first_air_date||"").slice(0,4)}</span>
+              <span class="badge">Duración: ${d.runtime||d.episode_run_time?.[0]||"?"} min</span>
+              <span class="badge">Idioma: ${d.original_language.toUpperCase()}</span>
+              <span class="badge">País: ${d.production_countries?.map(p=>p.name).join(", ")||"?"}</span>
             </p>
-            <p><strong>Director:</strong> ${director.name||"No disponible"}</p>
+            <p><strong>Director / Creador:</strong> ${director.name||"No disponible"}</p>
             <p><strong>Géneros:</strong> ${d.genres.map(g=>g.name).join(", ")}</p>
+            <p><strong>Reparto principal:</strong> ${mainCast}</p>
+            <p><strong>Popularidad TMDB:</strong> ${d.popularity}</p>
           </div>
         </div>
 
@@ -314,7 +331,7 @@ function detalle(type,id){
 
         <h3>📝 Tu reseña</h3>
         <textarea id="review"></textarea>
-        <button onclick="guardar(${id})">Guardar</button>
+        <button onclick="guardar(${id})">Guardar reseña</button>
       </div>
     `;
     estrellas(id);
@@ -344,7 +361,3 @@ function guardar(id){
 
 </body>
 </html>
-
-
-
-
