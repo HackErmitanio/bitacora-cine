@@ -1,212 +1,228 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Escena 24</title>
+<meta charset="UTF-8">
+<title>Escena 24</title>
 
-  <!-- =========================
-       CSS – ESTILOS
-  ========================== -->
-  <style>
-    body {
-      background-color: #0d1b2a;
-      color: #ffffff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1c2d;
+  color: #fff;
+}
 
-    h1 {
-      margin-top: 20px;
-      font-size: 2.5rem;
-    }
+header {
+  padding: 20px;
+  text-align: center;
+  background: #071421;
+}
 
-    p {
-      opacity: 0.85;
-    }
+header h1 {
+  margin: 0;
+}
 
-    /* Botones de categorías */
-    #categories {
-      margin: 20px;
-    }
+input {
+  width: 90%;
+  max-width: 500px;
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 15px;
+  border-radius: 5px;
+  border: none;
+}
 
-    #categories button {
-      margin: 6px;
-      padding: 10px 16px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background-color: #1b263b;
-      color: white;
-      transition: background 0.2s, transform 0.2s;
-    }
+section {
+  padding: 20px;
+}
 
-    #categories button:hover {
-      background-color: #415a77;
-      transform: scale(1.05);
-    }
+h2 {
+  border-bottom: 1px solid #1e3a5f;
+  padding-bottom: 5px;
+}
 
-    /* Estado */
-    #status {
-      margin: 15px;
-      font-size: 15px;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
 
-    /* Grid de posters */
-    #movies {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 20px;
-      padding: 20px;
-      max-width: 1200px;
-      margin: auto;
-    }
+.card {
+  cursor: pointer;
+}
 
-    /* Tarjetas */
-    .movie {
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
+.card img {
+  width: 100%;
+  border-radius: 8px;
+  transition: transform .2s;
+}
 
-    .movie:hover {
-      transform: scale(1.05);
-    }
+.card img:hover {
+  transform: scale(1.05);
+}
 
-    .movie img {
-      width: 100%;
-      border-radius: 8px;
-    }
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  overflow-y: auto;
+}
 
-    .movie h3 {
-      font-size: 14px;
-      margin-top: 8px;
-    }
-  </style>
+.modal-content {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #071421;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.modal img {
+  width: 200px;
+  float: left;
+  margin-right: 20px;
+  border-radius: 10px;
+}
+
+.close {
+  float: right;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.stars span {
+  font-size: 25px;
+  cursor: pointer;
+  color: gray;
+}
+
+.stars span.active {
+  color: gold;
+}
+
+textarea {
+  width: 100%;
+  min-height: 80px;
+  margin-top: 10px;
+}
+
+button {
+  padding: 10px;
+  background: #1e90ff;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- =========================
-       CONTENIDO HTML
-  ========================== -->
-
-  <h1>Escena 24</h1>
+<header>
+  <h1>🎬 Escena 24</h1>
   <p>Cine, series, anime y cultura cinematográfica</p>
+  <input id="search" placeholder="Buscar película, serie o anime...">
+</header>
 
-  <!-- Categorías -->
-  <div id="categories">
-    <button onclick="cargarPeliculas()">🎬 Películas</button>
-    <button onclick="cargarSeries()">📺 Series</button>
-    <button onclick="cargarAnime()">🍥 Anime</button>
-    <button onclick="cargarClasicos()">🕰️ Clásicos</button>
+<section>
+  <h2>Resultados</h2>
+  <div class="grid" id="results"></div>
+</section>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">✖</span>
+    <img id="modalImg">
+    <h2 id="modalTitle"></h2>
+    <p id="modalInfo"></p>
+    <p id="modalOverview"></p>
+
+    <h3>⭐ Tu puntuación</h3>
+    <div class="stars" id="stars"></div>
+
+    <h3>✍ Reseña</h3>
+    <textarea id="review"></textarea>
+    <button onclick="saveReview()">Guardar reseña</button>
   </div>
+</div>
 
-  <!-- Estado -->
-  <p id="status">Selecciona una categoría</p>
+<script>
+const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330";
+const IMG = "https://image.tmdb.org/t/p/w500";
+const results = document.getElementById("results");
 
-  <!-- Contenedor -->
-  <div id="movies"></div>
+document.getElementById("search").addEventListener("keyup", e => {
+  if (e.key === "Enter") search(e.target.value);
+});
 
-  <!-- =========================
-       JAVASCRIPT
-  ========================== -->
-  <script>
-    /* =========================
-       CONFIGURACIÓN
-    ========================== */
+function search(query) {
+  results.innerHTML = "⏳ Buscando...";
+  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-MX&query=${query}`)
+    .then(r => r.json())
+    .then(data => showResults(data.results));
+}
 
-    // ⚠️ REEMPLAZA POR TU API KEY DE TMDB (CON COMILLAS)
-    const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330";
+function showResults(items) {
+  results.innerHTML = "";
+  items.forEach(item => {
+    if (!item.poster_path) return;
 
-    const BASE_URL = "https://api.themoviedb.org/3";
-    const IMG_URL = "https://image.tmdb.org/t/p/w500";
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<img src="${IMG + item.poster_path}">`;
+    div.onclick = () => openModal(item);
+    results.appendChild(div);
+  });
+}
 
-    const container = document.getElementById("movies");
-    const status = document.getElementById("status");
+function openModal(item) {
+  document.getElementById("modal").style.display = "block";
+  document.getElementById("modalImg").src = IMG + item.poster_path;
+  document.getElementById("modalTitle").innerText = item.title || item.name;
+  document.getElementById("modalOverview").innerText = item.overview || "Sin descripción";
 
-    /* =========================
-       FUNCIONES BASE
-    ========================== */
+  const year = (item.release_date || item.first_air_date || "").split("-")[0];
+  document.getElementById("modalInfo").innerText = `${item.media_type.toUpperCase()} · ${year}`;
 
-    // Limpia pantalla antes de cargar algo nuevo
-    function limpiarPantalla() {
-      container.innerHTML = "";
-      status.textContent = "⏳ Cargando...";
-    }
+  loadStars(item.id);
+  loadReview(item.id);
+}
 
-    // Función genérica para cargar contenido
-    async function cargarContenido(url, tipo = "movie") {
-      limpiarPantalla();
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
 
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
+function loadStars(id) {
+  const container = document.getElementById("stars");
+  container.innerHTML = "";
+  let saved = localStorage.getItem("rating_" + id) || 0;
 
-        status.textContent = "🎬 Resultados";
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement("span");
+    s.innerText = "★";
+    if (i <= saved) s.classList.add("active");
+    s.onclick = () => {
+      localStorage.setItem("rating_" + id, i);
+      loadStars(id);
+    };
+    container.appendChild(s);
+  }
+}
 
-        data.results.forEach(item => {
-          const card = document.createElement("div");
-          card.className = "movie";
+function saveReview() {
+  const title = document.getElementById("modalTitle").innerText;
+  localStorage.setItem("review_" + title, document.getElementById("review").value);
+  alert("Reseña guardada");
+}
 
-          // title = películas | name = series/anime
-          const titulo = tipo === "tv" ? item.name : item.title;
-
-          card.innerHTML = `
-            <img src="${IMG_URL + item.poster_path}" alt="${titulo}">
-            <h3>${titulo}</h3>
-          `;
-
-          card.onclick = () => {
-            alert(
-              `🎬 ${titulo}\n\n${item.overview || "Sin descripción disponible."}`
-            );
-          };
-
-          container.appendChild(card);
-        });
-
-      } catch (error) {
-        status.textContent = "❌ Error al cargar contenido";
-        console.error(error);
-      }
-    }
-
-    /* =========================
-       CATEGORÍAS
-    ========================== */
-
-    // 🎬 Películas
-    function cargarPeliculas() {
-      cargarContenido(
-        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-MX`
-      );
-    }
-
-    // 📺 Series
-    function cargarSeries() {
-      cargarContenido(
-        `${BASE_URL}/tv/popular?api_key=${API_KEY}&language=es-MX`,
-        "tv"
-      );
-    }
-
-    // 🍥 Anime
-    function cargarAnime() {
-      cargarContenido(
-        `${BASE_URL}/discover/tv?api_key=${API_KEY}&language=es-MX&with_genres=16&with_origin_country=JP`,
-        "tv"
-      );
-    }
-
-    // 🕰️ Clásicos
-    function cargarClasicos() {
-      cargarContenido(
-        `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=es-MX&primary_release_date.lte=1970-12-31&sort_by=popularity.desc`
-      );
-    }
-  </script>
+function loadReview(id) {
+  document.getElementById("review").value = localStorage.getItem("review_" + id) || "";
+}
+</script>
 
 </body>
 </html>
