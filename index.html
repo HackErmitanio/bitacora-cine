@@ -5,29 +5,47 @@
 <title>Escena 24</title>
 
 <style>
+:root {
+  --bg: #0b1c2d;
+  --panel: #071421;
+  --accent: #cfae70;
+  --text: #f1f1f1;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0b1c2d;
-  color: white;
+  font-family: "Georgia", serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
 header {
-  background: #071421;
-  padding: 20px;
+  background: linear-gradient(180deg, #071421, #020a12);
+  padding: 30px;
   text-align: center;
 }
 
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  letter-spacing: 2px;
+}
+
+header p {
+  opacity: .8;
+  margin-top: 5px;
+}
+
 nav {
+  margin-top: 20px;
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 25px;
   flex-wrap: wrap;
-  margin-top: 10px;
 }
 
 nav a {
-  color: #9fc5ff;
+  color: var(--accent);
   text-decoration: none;
   font-weight: bold;
 }
@@ -37,45 +55,57 @@ nav a:hover {
 }
 
 main {
-  padding: 25px;
+  padding: 40px;
+}
+
+h2 {
+  border-left: 5px solid var(--accent);
+  padding-left: 10px;
+  margin-bottom: 20px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 22px;
+}
+
+.card {
+  text-align: center;
 }
 
 .card img {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: transform .2s;
+  transition: transform .3s, box-shadow .3s;
 }
 
 .card img:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
+  box-shadow: 0 10px 25px rgba(0,0,0,.6);
 }
 
-h2 {
-  border-bottom: 1px solid #1e3a5f;
-  padding-bottom: 5px;
+.card span {
+  font-size: .85rem;
+  opacity: .8;
 }
 
+/* DETALLE */
 .detail {
-  max-width: 900px;
+  max-width: 1000px;
   margin: auto;
 }
 
 .detail img {
-  width: 260px;
-  border-radius: 12px;
+  width: 280px;
   float: left;
-  margin-right: 25px;
+  margin-right: 30px;
+  border-radius: 14px;
 }
 
 .stars span {
-  font-size: 26px;
+  font-size: 28px;
   cursor: pointer;
   color: gray;
 }
@@ -86,16 +116,24 @@ h2 {
 
 textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 120px;
+  background: #020a12;
+  color: white;
+  border: 1px solid #333;
+  padding: 10px;
 }
 
 button {
-  padding: 10px 15px;
-  margin-top: 10px;
-  background: #1e90ff;
+  background: var(--accent);
+  color: black;
   border: none;
-  color: white;
+  padding: 10px 16px;
+  margin-top: 10px;
   cursor: pointer;
+}
+
+button:hover {
+  opacity: .85;
 }
 </style>
 </head>
@@ -103,14 +141,14 @@ button {
 <body>
 
 <header>
-  <h1>🎬 Escena 24</h1>
-  <p>Cine, series, anime y cultura cinematográfica</p>
+  <h1>ESCENA 24</h1>
+  <p>Archivo cinematográfico · crítica · memoria</p>
 
   <nav>
     <a href="#new">Películas nuevas</a>
     <a href="#anime">Anime</a>
     <a href="#series">Series</a>
-    <a href="#classic">Películas clásicas</a>
+    <a href="#classic">Cine clásico</a>
     <a href="#mexico">Cine de Oro Mexicano</a>
   </nav>
 </header>
@@ -122,113 +160,115 @@ const API_KEY = "5b4ad82505bd1853a5256c1db2d4b330";
 const IMG = "https://image.tmdb.org/t/p/w500";
 const app = document.getElementById("app");
 
-/* ---------------- ROUTER ---------------- */
 window.addEventListener("load", router);
 window.addEventListener("hashchange", router);
 
 function router() {
-  const hash = location.hash;
+  const h = location.hash;
 
-  if (hash.startsWith("#movie/") || hash.startsWith("#tv/")) {
-    const [type, id] = hash.replace("#","").split("/");
-    renderDetail(type, id);
+  if (h.startsWith("#movie/") || h.startsWith("#tv/")) {
+    const [t, id] = h.replace("#","").split("/");
+    detalle(t, id);
   } else {
-    renderCategory(hash.replace("#","") || "new");
+    catalogo(h.replace("#","") || "new");
   }
 }
 
-/* ---------------- CATEGORÍAS ---------------- */
-const categories = {
-  new: `discover/movie?primary_release_date.gte=2022`,
-  anime: `discover/movie?with_genres=16`,
-  series: `discover/tv`,
-  classic: `discover/movie?primary_release_date.lte=1980`,
-  mexico: `discover/movie?with_original_language=es&primary_release_date.lte=1970`
-};
+/* ---------------- CATÁLOGO ---------------- */
 
-function renderCategory(cat) {
-  app.innerHTML = `<h2>${getTitle(cat)}</h2><div class="grid" id="grid"></div>`;
-  loadAllPages(cat, 1);
+function catalogo(cat) {
+  app.innerHTML = `<h2>${tit(cat)}</h2><div class="grid" id="grid"></div>`;
+  cargar(cat, 1);
 }
 
-function loadAllPages(cat, page) {
-  const url = `https://api.themoviedb.org/3/${categories[cat]}&api_key=${API_KEY}&language=es-MX&page=${page}`;
-  fetch(url)
+function cargar(cat, page) {
+  const urls = {
+    new: `discover/movie?sort_by=popularity.desc&primary_release_date.gte=2021`,
+    classic: `discover/movie?primary_release_date.lte=1979`,
+    mexico: `discover/movie?with_original_language=es&region=MX&primary_release_date.lte=1970`,
+    series: `discover/tv?sort_by=popularity.desc`,
+    anime: `discover/tv?with_genres=16&with_original_language=ja`
+  };
+
+  fetch(`https://api.themoviedb.org/3/${urls[cat]}&api_key=${API_KEY}&language=es-MX&page=${page}`)
     .then(r => r.json())
-    .then(data => {
-      const grid = document.getElementById("grid");
-      data.results.forEach(item => {
-        if (!item.poster_path) return;
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `<img src="${IMG + item.poster_path}">`;
-        div.onclick = () => {
-          location.hash = `#${item.media_type || (cat === "series" ? "tv":"movie")}/${item.id}`;
+    .then(d => {
+      const g = document.getElementById("grid");
+      d.results.forEach(i => {
+        if (!i.poster_path) return;
+        const c = document.createElement("div");
+        c.className = "card";
+        c.innerHTML = `
+          <img src="${IMG + i.poster_path}">
+          <span>${(i.title || i.name)}</span>
+        `;
+        c.onclick = () => {
+          location.hash = `#${cat === "series" || cat === "anime" ? "tv":"movie"}/${i.id}`;
         };
-        grid.appendChild(div);
+        g.appendChild(c);
       });
-      if (page < data.total_pages && page < 5) {
-        loadAllPages(cat, page + 1);
-      }
+
+      if (page < 6) cargar(cat, page + 1);
     });
 }
 
-function getTitle(cat) {
+function tit(c) {
   return {
     new: "🎥 Películas nuevas",
-    anime: "🎌 Anime",
+    anime: "🎌 Anime (series japonesas)",
     series: "📺 Series",
-    classic: "🎞 Películas clásicas",
+    classic: "🎞 Cine clásico",
     mexico: "🇲🇽 Cine de Oro Mexicano"
-  }[cat];
+  }[c];
 }
 
 /* ---------------- DETALLE ---------------- */
-function renderDetail(type, id) {
+
+function detalle(type, id) {
   fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=es-MX`)
     .then(r => r.json())
-    .then(data => {
+    .then(d => {
       app.innerHTML = `
         <div class="detail">
           <button onclick="history.back()">⬅ Volver</button>
-          <h2>${data.title || data.name}</h2>
-          <img src="${IMG + data.poster_path}">
-          <p><strong>Año:</strong> ${(data.release_date || data.first_air_date || "").slice(0,4)}</p>
-          <p><strong>Descripción:</strong> ${data.overview || "Sin descripción"}</p>
+          <h2>${d.title || d.name}</h2>
+          <img src="${IMG + d.poster_path}">
+          <p><strong>Año:</strong> ${(d.release_date || d.first_air_date || "").slice(0,4)}</p>
+          <p>${d.overview || "Sin descripción disponible."}</p>
 
           <h3>⭐ Tu puntuación</h3>
           <div class="stars" id="stars"></div>
 
-          <h3>✍ Reseña</h3>
+          <h3>📝 Reseña</h3>
           <textarea id="review"></textarea>
-          <button onclick="saveReview(${id})">Guardar reseña</button>
+          <button onclick="guardar(${id})">Guardar reseña</button>
         </div>
       `;
-      loadStars(id);
+      estrellas(id);
       document.getElementById("review").value = localStorage.getItem("review_"+id) || "";
     });
 }
 
-/* ---------------- ESTRELLAS ---------------- */
-function loadStars(id) {
-  const stars = document.getElementById("stars");
-  stars.innerHTML = "";
-  let rating = localStorage.getItem("rating_"+id) || 0;
+/* ---------------- RATING ---------------- */
+
+function estrellas(id) {
+  const s = document.getElementById("stars");
+  s.innerHTML = "";
+  let r = localStorage.getItem("rating_"+id) || 0;
 
   for (let i=1;i<=5;i++) {
-    const s = document.createElement("span");
-    s.innerText = "★";
-    if (i <= rating) s.classList.add("active");
-    s.onclick = () => {
+    const e = document.createElement("span");
+    e.innerText = "★";
+    if (i <= r) e.classList.add("active");
+    e.onclick = () => {
       localStorage.setItem("rating_"+id, i);
-      loadStars(id);
+      estrellas(id);
     };
-    stars.appendChild(s);
+    s.appendChild(e);
   }
 }
 
-/* ---------------- RESEÑA ---------------- */
-function saveReview(id) {
+function guardar(id) {
   localStorage.setItem("review_"+id, document.getElementById("review").value);
   alert("Reseña guardada");
 }
@@ -236,12 +276,6 @@ function saveReview(id) {
 
 </body>
 </html>
-
-
-
-
-
-
 
 
 
